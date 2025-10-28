@@ -31,6 +31,8 @@ namespace OcppTestTool
             {
                 services.AddNavigationViewPageProvider();
 
+                //services.AddSingleton<ApplicationHostService>();
+                //services.AddHostedService(sp => sp.GetRequiredService<ApplicationHostService>());
                 services.AddHostedService<ApplicationHostService>();
 
                 // Theme manipulation
@@ -45,17 +47,22 @@ namespace OcppTestTool
                 // Main window with navigation
                 services.AddTransient<LoginWindow>();
 
-                services.AddSingleton<INavigationWindow, MainWindow>();
-                services.AddSingleton<MainWindowViewModel>();
+                services.AddTransient<INavigationWindow, MainWindow>();
+                services.AddTransient<MainWindowViewModel>();
 
-
+                // Pages
                 services.AddTransient<DashboardPage>();
                 services.AddTransient<DataPage>();
                 services.AddTransient<SettingsPage>();
 
+                // ViewModels
                 services.AddTransient<DashboardViewModel>();
                 services.AddTransient<DataViewModel>();
                 services.AddTransient<SettingsViewModel>();
+
+                // Services
+                services.AddSingleton<ISessionService, SessionService>();
+                services.AddSingleton<ISessionStorage, FileSessionStorage>();
             }).Build();
 
         /// <summary>

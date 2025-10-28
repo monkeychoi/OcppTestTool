@@ -1,4 +1,6 @@
-﻿using System;
+﻿using OcppTestTool.Models;
+using OcppTestTool.Services;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,9 +20,14 @@ namespace OcppTestTool.Views.Windows
     
     public partial class LoginWindow : FluentWindow
     {
-        public LoginWindow()
+        private readonly ISessionService _sessionService;
+        private readonly ISessionStorage _sessionStorage;
+
+        public LoginWindow(ISessionService sessionService, ISessionStorage sessionStorage)
         {
             InitializeComponent();
+            _sessionService = sessionService;
+            _sessionStorage = sessionStorage;
         }
 
         private void OnCancelClick(object sender, RoutedEventArgs e)
@@ -37,6 +44,15 @@ namespace OcppTestTool.Views.Windows
             // 임시 자격 증명: test / 1234
             if (id == "test" && pw == "1234")
             {
+                var user = new AuthUser
+                {
+                    UserId = id,
+                    DisplayName = "김개똥",
+                    Role = "Admin"
+                };
+                _sessionService.SignIn(user);
+                _sessionStorage.SaveAsync(user);
+
                 DialogResult = true; // 성공
                 Close();
             }

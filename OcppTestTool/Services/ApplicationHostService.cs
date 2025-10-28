@@ -11,22 +11,28 @@ namespace OcppTestTool.Services
     /// </summary>
     public class ApplicationHostService : IHostedService
     {
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceProvider _sp;
+        private bool _isTransitioning;
 
         private INavigationWindow _navigationWindow;
 
-        public ApplicationHostService(IServiceProvider serviceProvider)
+        public ApplicationHostService(IServiceProvider sp)
         {
-            _serviceProvider = serviceProvider;
+            _sp = sp;
         }
 
         /// <summary>
         /// Triggered when the application host is ready to start the service.
         /// </summary>
         /// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            await HandleActivationAsync();
+            // 🔒 로그인/전환 동안 자동 종료 방지
+            Application.Current.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            // 앱 시작 루프
+            Application.Current.Dispatcher.Invoke(ShowLoginWindow);
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -38,60 +44,75 @@ namespace OcppTestTool.Services
             await Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Creates main window during activation.
-        /// </summary>
-        private async Task HandleActivationAsync()
+
+        private void ShowLoginWindow()
         {
-            var app = Application.Current;
+            if (_isTransitioning) return;
+            _isTransitioning = true;
 
-            // 0) 종료 모드 보관 & 로그인 동안 앱 종료 금지
-            var prevShutdownMode = app.ShutdownMode;
-            app.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-
-            // 1) 로그인 먼저
-            var login = _serviceProvider.GetRequiredService<LoginWindow>();
-            bool? result = login.ShowDialog();
-
-            if (result != true)
+            try
             {
-                // 로그인 취소/실패: 앱 종료
-                app.Shutdown();
-                return;
-            }
+                var app = Application.Current;
+                var original = app.ShutdownMode;                
 
-            // 2) 로그인 성공 → 메인 네비게이션 윈도우 띄우기
-            if (!app.Windows.OfType<MainWindow>().Any())
-            {
-                //_navigationWindow = (
-                //    _serviceProvider.GetService(typeof(INavigationWindow)) as INavigationWindow
-                //)!;
-                //_navigationWindow!.ShowWindow();
+                var loginWindow = _sp.GetRequiredService<LoginWindow>();
+                bool? result = loginWindow.ShowDialog();   // 성공 시 LoginWindow에서 DialogResult = true
 
-                //_navigationWindow.Navigate(typeof(Views.Pages.DashboardPage));
-
-                _navigationWindow = _serviceProvider.GetRequiredService<INavigationWindow>();
-                var window = (Window)_navigationWindow;
-
-                // MainWindow로 지정 (중요)
-                app.MainWindow = window;
-
-                // Loaded 이후에 Navigate (null 방지)
-                window.Loaded += (_, __) =>
+                if (result == true)
                 {
-                    // 원하는 시작 페이지
-                    _navigationWindow.Navigate(typeof(Views.Pages.DashboardPage));
-                };
+                    // 메인 창 새로 생성
+                    var navWindow = _sp.GetRequiredService<INavigationWindow>();
+                    var mainWindow = (Window)navWindow;
 
-                _navigationWindow.ShowWindow();
+                    // 이전 핸들러 중복 방지(혹시나)
+                    mainWindow.Closed -= MainWindow_Closed;
+
+                    app.MainWindow = mainWindow;
+
+                    // 시작 페이지 이동 등 필요한 초기화
+                    mainWindow.Loaded += (_, __) =>
+                    {
+                        navWindow.Navigate(typeof(Views.Pages.DashboardPage));
+                    };
+
+                    navWindow.ShowWindow();  // 또는 mainWindow.Show()
+
+                    // 메인 닫히면 다시 로그인 띄우기
+                    mainWindow.Closed += MainWindow_Closed;                    
+
+                }
+                else
+                {
+                    app.Shutdown(); // 로그인 취소/실패
+                }
             }
-
-            // 3) 종료 모드 원복 (보통 OnMainWindowClose 또는 이전값)
-            app.ShutdownMode = prevShutdownMode == ShutdownMode.OnExplicitShutdown
-                ? ShutdownMode.OnMainWindowClose
-                : prevShutdownMode;
-
-            await Task.CompletedTask;
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    $"창 생성 실패: {ex.Message}\n{ex.StackTrace}",
+                    "오류",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                Application.Current.Shutdown();
+            }
+            finally
+            {
+                _isTransitioning = false;
+            }
         }
+
+        private void MainWindow_Closed(object? sender, EventArgs e)
+        {
+            if (sender is Window w)
+                w.Closed -= MainWindow_Closed;
+
+            // 메인 닫히면 다시 로그인 루프 재진입
+            //Application.Current.Dispatcher.BeginInvoke(new Action(ShowLoginWindow));
+
+            ShowLoginWindow();
+        }
+
+
     }
 }
