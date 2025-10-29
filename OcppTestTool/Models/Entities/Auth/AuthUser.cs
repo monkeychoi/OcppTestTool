@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OcppTestTool.Models
+namespace OcppTestTool.Models.Entities.Auth
 {
     public sealed class AuthUser
     {
@@ -12,5 +12,6 @@ namespace OcppTestTool.Models
         public string DisplayName { get; init; } = "";
         public string Email { get; init; } = "";
         public string Role { get; init; } = "";
+        public string Token { get; set; } = "";
     }
 }

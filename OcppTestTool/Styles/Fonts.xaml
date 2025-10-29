@@ -1,0 +1,9 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- 프로젝트에 포함된 Noto Sans KR(Assets/Fonts)을 AppFont로 노출 -->
+    <FontFamily x:Key="AppFont">
+        pack://application:,,,/Assets/Fonts/#Noto Sans KR
+    </FontFamily>
+
+</ResourceDictionary>

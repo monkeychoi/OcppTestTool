@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using OcppTestTool.Models;
-using OcppTestTool.Services;
+using OcppTestTool.Models.Entities.Auth;
+using OcppTestTool.Services.Auth;
 using OcppTestTool.Views.Windows;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -11,7 +11,6 @@ namespace OcppTestTool.ViewModels.Windows
     public partial class MainWindowViewModel : ObservableObject
     {
         private readonly ISessionService _session;
-        private readonly ISessionStorage _storage;
 
         [ObservableProperty]
         private string _applicationTitle = "Ocpp Test Tool";
@@ -21,15 +20,15 @@ namespace OcppTestTool.ViewModels.Windows
         {
             new NavigationViewItem()
             {
-                Content = "Home",
+                Content = "대시보드",
                 Icon = new SymbolIcon { Symbol = SymbolRegular.Home24 },
                 TargetPageType = typeof(Views.Pages.DashboardPage)
             },
             new NavigationViewItem()
             {
-                Content = "Data",
-                Icon = new SymbolIcon { Symbol = SymbolRegular.DataHistogram24 },
-                TargetPageType = typeof(Views.Pages.DataPage)
+                Content = "사용자관리",
+                Icon = new SymbolIcon { Symbol = SymbolRegular.People32 },
+                TargetPageType = typeof(Views.Pages.UserManagementPage)
             }
         };
 
@@ -55,32 +54,15 @@ namespace OcppTestTool.ViewModels.Windows
         /// </summary>
         public AuthUser? CurrentUser => _session.CurrentUser;
 
-        public MainWindowViewModel(
-            ISessionService session,
-            ISessionStorage storage)
+        public MainWindowViewModel(ISessionService session)
         {
             _session = session;
-            _storage = storage;
 
             // 세션 변경 시 UI 갱신
             _session.PropertyChanged += OnSessionPropertyChanged;
-
-            // 앱이 메인으로 들어왔는데 메모리 세션이 비어 있으면 저장소에서 복원
-            _ = InitializeAsync();
+            
         }
-
-        private async Task InitializeAsync()
-        {
-            if (_session.CurrentUser == null)
-            {
-                var loaded = await _storage.LoadAsync();
-                if (loaded != null)
-                {
-                    _session.SignIn(loaded);
-                    OnPropertyChanged(nameof(CurrentUser));
-                }
-            }
-        }
+       
 
         private void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -108,7 +90,6 @@ namespace OcppTestTool.ViewModels.Windows
         private async Task Logout()
         {
             _session.SignOut();
-            await _storage.ClearAsync();
 
             Application.Current.MainWindow?.Close();
         }

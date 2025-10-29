@@ -29,15 +29,36 @@
     </ui:FluentWindow.InputBindings>
 
     <Grid>
+        
         <ui:TitleBar
             x:Name="TitleBar"
+            Margin="40,0,0,0"
             Title="{Binding ViewModel.ApplicationTitle}"
             Grid.Row="0"
             CloseWindowByDoubleClickOnIcon="False">
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="pack://application:,,,/Assets/wpfui-icon-256.png" />
             </ui:TitleBar.Icon>
+            <ui:TitleBar.TrailingContent>
+                <!-- 우측: 사용자 영역(아바타+이름, 클릭하면 메뉴) -->
+                <StackPanel Orientation="Horizontal"
+                            Grid.Column="1">
+
+                    <Menu FontSize="14">
+                        <ui:MenuItem Header="{Binding ViewModel.CurrentUser.DisplayName}"
+                                     Icon="{ui:SymbolIcon Symbol=Document24}">
+                            <ui:MenuItem Header="정보변경" />
+                            <ui:MenuItem Header="비밀번호 변경" />
+                            <ui:MenuItem Header="로그아웃"
+                                         Command="{Binding ViewModel.LogoutCommand}" />
+
+                        </ui:MenuItem>
+                    </Menu>
+                </StackPanel>
+            </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
+
+        
 
         <ui:NavigationView
             x:Name="RootNavigation"
@@ -46,38 +67,15 @@
             FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems, Mode=OneWay}"
             FrameMargin="0"
             IsBackButtonVisible="Visible"
+            PaneTitle="메뉴"
             IsPaneToggleVisible="True"
             MenuItemsSource="{Binding ViewModel.MenuItems, Mode=OneWay}"
             OpenPaneLength="250"
             PaneDisplayMode="Left"
             TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}">
             <ui:NavigationView.Header>
-                <Grid Margin="30,32,20,20">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <!-- 좌측: 기존 Breadcrumb -->
-                    <ui:BreadcrumbBar x:Name="BreadcrumbBar" />
-
-                    <!-- 우측: 사용자 영역(아바타+이름, 클릭하면 메뉴) -->
-                    <StackPanel Orientation="Horizontal"
-                                Grid.Column="1">
-
-                        <Menu FontSize="14">
-                            <ui:MenuItem Header="{Binding ViewModel.CurrentUser.DisplayName}"
-                                         Icon="{ui:SymbolIcon Symbol=Document24}">
-                                <ui:MenuItem Header="정보변경" />
-                                <ui:MenuItem Header="비밀번호 변경" />
-                                <ui:MenuItem Header="로그아웃"
-                                             Command="{Binding ViewModel.LogoutCommand}"/>
-
-                            </ui:MenuItem>
-                        </Menu>
-                    </StackPanel>
-                   
-                </Grid>
+                <ui:BreadcrumbBar x:Name="BreadcrumbBar"
+                                  Margin="30,15,20,20" />
             </ui:NavigationView.Header>
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox x:Name="AutoSuggestBox" PlaceholderText="Search">

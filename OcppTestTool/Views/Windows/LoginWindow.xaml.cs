@@ -1,5 +1,6 @@
 ﻿using OcppTestTool.Models;
-using OcppTestTool.Services;
+using OcppTestTool.Services.Auth;
+using OcppTestTool.ViewModels.Windows;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,48 +21,19 @@ namespace OcppTestTool.Views.Windows
     
     public partial class LoginWindow : FluentWindow
     {
-        private readonly ISessionService _sessionService;
-        private readonly ISessionStorage _sessionStorage;
+        public LoginWindowViewModel ViewModel { get; }
 
-        public LoginWindow(ISessionService sessionService, ISessionStorage sessionStorage)
+        public LoginWindow(LoginWindowViewModel vm)
         {
             InitializeComponent();
-            _sessionService = sessionService;
-            _sessionStorage = sessionStorage;
-        }
-
-        private void OnCancelClick(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false; // 취소
-            Close();
-        }
-
-        private void OnLoginClick(object sender, RoutedEventArgs e)
-        {
-            var id = UserId.Text?.Trim();
-            var pw = UserPassword.Password;
-
-            // 임시 자격 증명: test / 1234
-            if (id == "test" && pw == "1234")
+            ViewModel = vm;
+            DataContext = this;
+            ViewModel.CloseRequested += (_, ok) =>
             {
-                var user = new AuthUser
-                {
-                    UserId = id,
-                    DisplayName = "김개똥",
-                    Role = "Admin"
-                };
-                _sessionService.SignIn(user);
-                _sessionStorage.SaveAsync(user);
-
-                DialogResult = true; // 성공
+                DialogResult = ok;
                 Close();
-            }
-            else
-            {
-                // 간단 알림
-                System.Windows.MessageBox.Show("아이디 또는 비밀번호가 올바르지 않습니다.", "로그인 실패",
-                    System.Windows.MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
+            };
         }
+        
     }
 }
