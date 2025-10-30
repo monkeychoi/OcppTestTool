@@ -32,4 +32,14 @@ namespace OcppTestTool.Models.Dtos.Protocol
         [JsonPropertyName("codec")] public string Codec { get; init; } = "";
         [JsonPropertyName("meta")] public OcppProtocolMetaDto? Meta { get; init; }
     }
+
+    public sealed class OcppProtocolEditDto
+    {
+        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("name")] public string Name { get; init; } = "";
+        [JsonPropertyName("version")] public string Version { get; init; } = "";
+        [JsonPropertyName("transport")] public string Transport { get; init; } = "";
+        [JsonPropertyName("codec")] public string Codec { get; init; } = "";
+        [JsonPropertyName("meta")] public OcppProtocolMetaDto? Meta { get; init; }
+    }
 }

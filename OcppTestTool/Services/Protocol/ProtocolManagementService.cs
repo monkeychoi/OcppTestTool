@@ -38,5 +38,16 @@ namespace OcppTestTool.Services.Protocol
             var entity = resp.Data.ToEntity();
             return ApiResult<OcppProtocol>.Ok(entity);
         }
+
+        public async Task<ApiResult<OcppProtocol>> EditProtocolAsync(OcppProtocolEditDto dto, CancellationToken ct = default)
+        {
+            var resp = await _api.PutAsync<OcppProtocolEditDto, OcppProtocolDto>($"/admin/protocols/{dto.Id}", dto, ct);
+
+            if (!resp.Success || resp.Data is null)
+                return ApiResult<OcppProtocol>.Fail(resp.Error ?? "Failed to create protocol.");
+
+            var entity = resp.Data.ToEntity();
+            return ApiResult<OcppProtocol>.Ok(entity);
+        }
     }
 }

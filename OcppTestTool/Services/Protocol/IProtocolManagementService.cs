@@ -13,5 +13,6 @@ namespace OcppTestTool.Services.Protocol
     {
         Task<IReadOnlyList<OcppProtocol>> GetProtocolsAsync(CancellationToken ct = default);
         Task<ApiResult<OcppProtocol>> CreateProtocolAsync(OcppProtocolCreateDto dto, CancellationToken ct = default);
+        Task<ApiResult<OcppProtocol>> EditProtocolAsync(OcppProtocolEditDto dto, CancellationToken ct = default);
     }
 }

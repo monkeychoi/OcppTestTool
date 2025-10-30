@@ -39,6 +39,10 @@
                         Margin="8,0,0,0"
                         Command="{Binding ViewModel.OpenCreateCommand}"
                         IsEnabled="{Binding ViewModel.IsBusy, Converter={StaticResource InverseBool}}" />
+                <Button Content="수정"
+                        Margin="8,0,0,0"
+                        Command="{Binding ViewModel.OpenCreateCommand}"
+                        IsEnabled="{Binding ViewModel.IsBusy, Converter={StaticResource InverseBool}}" />
             </StackPanel>
             
         </StackPanel>
