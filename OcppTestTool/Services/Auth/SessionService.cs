@@ -15,14 +15,12 @@ namespace OcppTestTool.Services.Auth
         public AuthUser? CurrentUser
         {
             get => _currentUser;
-            private set { _currentUser = value; OnPropertyChanged(); }
+            private set { _currentUser = value; }
         }
 
         public void SignIn(AuthUser user) => CurrentUser = user;
         public void SignOut() => CurrentUser = null;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string? name = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        
     }
 }

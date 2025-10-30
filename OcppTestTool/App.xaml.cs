@@ -6,6 +6,8 @@ using OcppTestTool.Models.Entities.Options;
 using OcppTestTool.Services;
 using OcppTestTool.Services.Auth;
 using OcppTestTool.Services.Http;
+using OcppTestTool.Services.Protocol;
+using OcppTestTool.Services.Windows;
 using OcppTestTool.ViewModels.Pages;
 using OcppTestTool.ViewModels.Windows;
 using OcppTestTool.Views.Pages;
@@ -54,6 +56,11 @@ namespace OcppTestTool
 
                 // Service containing navigation, same as INavigationWindow... but without window
                 services.AddSingleton<INavigationService, NavigationService>();
+                services.AddSingleton<ISnackbarService, SnackbarService>();
+                services.AddSingleton<IContentDialogService, ContentDialogService>();
+
+                services.AddSingleton<IViewLocator, ConventionViewLocator>();
+                services.AddSingleton<IWindowService, WindowService>();
 
                 // Main window with navigation
                 services.AddTransient<LoginWindow>();
@@ -64,12 +71,14 @@ namespace OcppTestTool
 
                 // Pages
                 services.AddTransient<DashboardPage>();
+                services.AddTransient<ProtocolManagementPage>();
                 services.AddTransient<UserManagementPage>();
                 services.AddTransient<DataPage>();
                 services.AddTransient<SettingsPage>();
 
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
+                services.AddTransient<ProtocolManagementViewModel>();
                 services.AddTransient<UserManagementViewModel>();
                 services.AddTransient<DataViewModel>();
                 services.AddTransient<SettingsViewModel>();
@@ -99,8 +108,8 @@ namespace OcppTestTool
 
                 // 4) 도메인 API 등록
                 services.AddTransient<IAuthService, AuthService>();
+                services.AddTransient<IProtocolManagementService, ProtocolManagementService>();
 
-               
 
             }).Build();
 

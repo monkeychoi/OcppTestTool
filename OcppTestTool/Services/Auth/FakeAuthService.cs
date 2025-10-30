@@ -17,7 +17,7 @@ namespace OcppTestTool.Services.Auth
                 var user = new AuthUser
                 {
                     UserId = userId,
-                    DisplayName = "김개똥",
+                    UserName = "김개똥",
                     Email = "test@example.com",
                     Role = "Admin"
                 };

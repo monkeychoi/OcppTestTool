@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OcppTestTool.Models.Entities.Auth;
+using OcppTestTool.Models.Entities.Common;
 using OcppTestTool.Services.Auth;
 using OcppTestTool.Views.Windows;
 using System.Collections.ObjectModel;
@@ -11,26 +12,13 @@ namespace OcppTestTool.ViewModels.Windows
     public partial class MainWindowViewModel : ObservableObject
     {
         private readonly ISessionService _session;
+       
 
         [ObservableProperty]
         private string _applicationTitle = "Ocpp Test Tool";
 
         [ObservableProperty]
-        private ObservableCollection<object> _menuItems = new()
-        {
-            new NavigationViewItem()
-            {
-                Content = "대시보드",
-                Icon = new SymbolIcon { Symbol = SymbolRegular.Home24 },
-                TargetPageType = typeof(Views.Pages.DashboardPage)
-            },
-            new NavigationViewItem()
-            {
-                Content = "사용자관리",
-                Icon = new SymbolIcon { Symbol = SymbolRegular.People32 },
-                TargetPageType = typeof(Views.Pages.UserManagementPage)
-            }
-        };
+        private ObservableCollection<object> _menuItems = new();       
 
         [ObservableProperty]
         private ObservableCollection<object> _footerMenuItems = new()
@@ -58,16 +46,29 @@ namespace OcppTestTool.ViewModels.Windows
         {
             _session = session;
 
-            // 세션 변경 시 UI 갱신
-            _session.PropertyChanged += OnSessionPropertyChanged;
-            
+            RebuildMenu();
         }
-       
 
-        private void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void RebuildMenu()
         {
-            if (e.PropertyName == nameof(ISessionService.CurrentUser))
-                OnPropertyChanged(nameof(CurrentUser));
+            var role = _session.CurrentUser?.Role;
+            bool hasAccess(MenuDef d) => d.RequiredRole is null
+                || string.Equals(d.RequiredRole, role, StringComparison.OrdinalIgnoreCase);
+
+            var items = MenuCatalog.All
+                .Where(hasAccess)
+                .Select(d => new NavigationViewItem
+                {
+                    Content = d.Title,
+                    Icon = new SymbolIcon { Symbol = d.Icon },
+                    TargetPageType = d.PageType
+                })
+                .ToList();
+
+            foreach (var item in items)
+            {
+                MenuItems.Add(item);
+            }
         }
 
         // === 사용자 전용 메뉴 커맨드 ===
@@ -87,7 +88,7 @@ namespace OcppTestTool.ViewModels.Windows
         }
 
         [RelayCommand]
-        private async Task Logout()
+        private void Logout()
         {
             _session.SignOut();
 

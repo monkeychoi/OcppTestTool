@@ -14,8 +14,8 @@ namespace OcppTestTool.ViewModels.Windows
 
         public event EventHandler<bool>? CloseRequested; // true=OK, false=Cancel
 
-        [ObservableProperty] private string _userId = "alpha01";
-        [ObservableProperty] private string _userPassword = "Passw0rd!1"; // 필요 시 SecureString으로 교체
+        [ObservableProperty] private string _userId = "kappa10";
+        [ObservableProperty] private string _userPassword = "Passw0rd!0"; // 필요 시 SecureString으로 교체
         [ObservableProperty] private bool _isBusy;
         [ObservableProperty] private string _errorMessage = "";
 

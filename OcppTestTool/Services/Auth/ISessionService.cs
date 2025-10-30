@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace OcppTestTool.Services.Auth
 {
-    public interface ISessionService : INotifyPropertyChanged
+    public interface ISessionService
     {
         AuthUser? CurrentUser { get; }
         void SignIn(AuthUser user);

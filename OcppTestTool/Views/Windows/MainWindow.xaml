@@ -45,7 +45,7 @@
                             Grid.Column="1">
 
                     <Menu FontSize="14">
-                        <ui:MenuItem Header="{Binding ViewModel.CurrentUser.DisplayName}"
+                        <ui:MenuItem Header="{Binding ViewModel.CurrentUser.UserName}"
                                      Icon="{ui:SymbolIcon Symbol=Document24}">
                             <ui:MenuItem Header="정보변경" />
                             <ui:MenuItem Header="비밀번호 변경" />
@@ -62,8 +62,7 @@
 
         <ui:NavigationView
             x:Name="RootNavigation"
-            Padding="42,0,42,0"
-            BreadcrumbBar="{Binding ElementName=BreadcrumbBar}"
+            
             FooterMenuItemsSource="{Binding ViewModel.FooterMenuItems, Mode=OneWay}"
             FrameMargin="0"
             IsBackButtonVisible="Visible"
@@ -73,10 +72,7 @@
             OpenPaneLength="250"
             PaneDisplayMode="Left"
             TitleBar="{Binding ElementName=TitleBar, Mode=OneWay}">
-            <ui:NavigationView.Header>
-                <ui:BreadcrumbBar x:Name="BreadcrumbBar"
-                                  Margin="30,15,20,20" />
-            </ui:NavigationView.Header>
+            
             <ui:NavigationView.AutoSuggestBox>
                 <ui:AutoSuggestBox x:Name="AutoSuggestBox" PlaceholderText="Search">
                     <ui:AutoSuggestBox.Icon>
