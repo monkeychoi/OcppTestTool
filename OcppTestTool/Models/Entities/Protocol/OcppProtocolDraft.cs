@@ -8,6 +8,7 @@ namespace OcppTestTool.Models.Entities.Protocol
 {
     public partial class OcppProtocolDraft : ObservableObject
     {
+        [ObservableProperty] private int id;
         [ObservableProperty] private string name = "";
         [ObservableProperty] private string version = "";
         [ObservableProperty] private string transport = "WebSocket";

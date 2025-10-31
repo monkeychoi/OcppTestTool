@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
 
         <ui:TitleBar Grid.Row="0"
-                     Title="프로토콜 등록"
+                     Title="{Binding Title}"
                      ShowMinimize="False"
                      ShowMaximize="False"
                      ShowClose="True" />
@@ -81,7 +81,7 @@
                            Appearance="Dark"
                            Width="96"
                            Command="{Binding CancelCommand}"/>
-                <ui:Button Content="저장"
+                <ui:Button Content="{Binding SaveButtonText}"
                            IsDefault="True"
                            Appearance="Primary"
                            Width="96"

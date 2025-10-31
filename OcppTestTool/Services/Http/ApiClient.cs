@@ -59,9 +59,14 @@ namespace OcppTestTool.Services.Http
             try
             {
                 using var resp = await _http.DeleteAsync(uri, ct);
-                if (resp.IsSuccessStatusCode) return ApiResult<bool>.Ok(true);
+                var code = (int)resp.StatusCode;
+                var reason = resp.ReasonPhrase;
+
+                if (resp.IsSuccessStatusCode) 
+                    return ApiResult<bool>.Ok(true, code, reason);
+
                 var err = await ReadErrorAsync(resp, ct);
-                return ApiResult<bool>.Fail(err);
+                return ApiResult<bool>.Fail(err, code, reason);
             }
             catch (TaskCanceledException) { return ApiResult<bool>.Fail("요청이 취소되었습니다."); }
             catch (HttpRequestException ex) { return ApiResult<bool>.Fail($"네트워크 오류: {ex.Message}"); }
@@ -90,22 +95,56 @@ namespace OcppTestTool.Services.Http
             try
             {
                 var content = await resp.Content.ReadAsStringAsync(ct);
-                if (string.IsNullOrWhiteSpace(content))
-                    return $"{(int)resp.StatusCode} {resp.ReasonPhrase}";
+                var status = (int)resp.StatusCode;
 
-                // ProblemDetails 최소 파싱
-                // { "title": "...", "detail": "...", "errors": {...} }
+                if (string.IsNullOrWhiteSpace(content))
+                    return $"{status} {resp.ReasonPhrase}";
+
+                string? msg = null;
+
                 try
                 {
                     using var doc = JsonDocument.Parse(content);
-                    if (doc.RootElement.TryGetProperty("detail", out var d) && d.ValueKind == JsonValueKind.String)
-                        return d.GetString()!;
-                    if (doc.RootElement.TryGetProperty("title", out var t) && t.ValueKind == JsonValueKind.String)
-                        return t.GetString()!;
+                    var root = doc.RootElement;
+
+                    // 1) 문제 상세 우선
+                    if (root.TryGetProperty("detail", out var d) && d.ValueKind == JsonValueKind.String)
+                        msg = d.GetString();
+
+                    // 2) 타이틀
+                    if (msg is null && root.TryGetProperty("title", out var t) && t.ValueKind == JsonValueKind.String)
+                        msg = t.GetString();
+
+                    // 3) 일반적인 에러 키들
+                    if (msg is null && root.TryGetProperty("error", out var e) && e.ValueKind == JsonValueKind.String)
+                        msg = e.GetString();
+
+                    if (msg is null && root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String)
+                        msg = m.GetString();
+
+                    // 4) ModelState 스타일의 errors 객체가 있을 수 있음
+                    if (msg is null && root.TryGetProperty("errors", out var errs) && errs.ValueKind == JsonValueKind.Object)
+                    {
+                        foreach (var prop in errs.EnumerateObject())
+                        {
+                            // ["메시지1","메시지2"...] 중 첫 개만 사용
+                            if (prop.Value.ValueKind == JsonValueKind.Array && prop.Value.GetArrayLength() > 0)
+                            {
+                                var first = prop.Value[0];
+                                if (first.ValueKind == JsonValueKind.String)
+                                {
+                                    msg = first.GetString();
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
                 catch { /* 무시하고 원문 반환 */ }
 
-                return content;
+                // 최종 메시지 구성: 내용 + (HTTP 코드)
+                msg ??= content;
+                return $"{msg} (HTTP {status})";
             }
             catch
             {

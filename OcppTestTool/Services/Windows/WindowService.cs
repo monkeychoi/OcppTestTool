@@ -41,20 +41,35 @@ namespace OcppTestTool.Services.Windows
             // 닫힘 처리
             var tcs = new TaskCompletionSource<TResult?>();
             EventHandler<TResult?>? handler = null;
-            handler = (s, result) =>
+
+            void Cleanup()
             {
                 vm.CloseRequested -= handler;
-                try { win.DialogResult = true; } catch { /* ignore */ }
+                win.Closed -= onClosed;
+            }
+            void onClosed(object? s, EventArgs e)
+            {
+                // 사용자가 X로 닫은 경우 → 취소로 간주
+                if (!tcs.Task.IsCompleted) tcs.TrySetResult(default);
+                Cleanup();
+            }
+
+            handler = (s, result) =>
+            {
+                Cleanup();
+                try { win.DialogResult = result is not null; } catch { /* ignore */ }
                 win.Close();
                 tcs.TrySetResult(result);
             };
             vm.CloseRequested += handler;
+            win.Closed += onClosed;
 
             win.DataContext = vm;
 
             // 모달 표시
             var _ = win.ShowDialog(); // 동기 반환, 하지만 우리는 tcs로 결과 받음
-                                      // CloseRequested가 호출되지 않았다면 취소로 간주
+                                      
+            // CloseRequested가 호출되지 않았다면 취소로 간주
             if (!tcs.Task.IsCompleted) tcs.TrySetResult(default);
 
             return tcs.Task;

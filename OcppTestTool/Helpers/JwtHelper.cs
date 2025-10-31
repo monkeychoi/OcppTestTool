@@ -45,5 +45,8 @@ namespace OcppTestTool.Helpers
             }
             return Convert.FromBase64String(s);
         }
+
+        public static DateTimeOffset FromUnixSeconds(long unixSecondsUtc)
+        => DateTimeOffset.FromUnixTimeSeconds(unixSecondsUtc);
     }
 }

@@ -21,16 +21,21 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="8" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <TextBlock Text="프로토콜 관리"
                        FontSize="20"
                        FontWeight="SemiBold"
                        VerticalAlignment="Center" />
             <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Grid.Column="1"
                         Margin="12,0,0,0">
                 <Button Content="새로고침"
                         Command="{Binding ViewModel.RefreshCommand}"
@@ -41,55 +46,48 @@
                         IsEnabled="{Binding ViewModel.IsBusy, Converter={StaticResource InverseBool}}" />
                 <Button Content="수정"
                         Margin="8,0,0,0"
-                        Command="{Binding ViewModel.OpenCreateCommand}"
-                        IsEnabled="{Binding ViewModel.IsBusy, Converter={StaticResource InverseBool}}" />
+                        Command="{Binding ViewModel.OpenEditCommand}"
+                        IsEnabled="{Binding ViewModel.SelectedProtocol, Converter={StaticResource NotNullToBool}}" />
+                <Button Content="삭제"
+                        Margin="8,0,0,0"
+                        Command="{Binding ViewModel.OpenDeleteCommand}"
+                        IsEnabled="{Binding ViewModel.SelectedProtocol, Converter={StaticResource NotNullToBool}}" />
             </StackPanel>
             
-        </StackPanel>
-
-        <Border Grid.Row="1" />
-        <ScrollViewer Grid.Row="2"
+        </Grid>
+        
+        <ScrollViewer Grid.Row="1"
+                      Margin="0,8,0,0"
                       HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled"
                       CanContentScroll="False">
 
-            <DataGrid ItemsSource="{Binding ViewModel.Protocols}"
-                      SelectedItem="{Binding ViewModel.SelectedProtocol, Mode=TwoWay}"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      IsReadOnly="True"
-                      HeadersVisibility="Column"
-                      GridLinesVisibility="Horizontal"
-                      AlternationCount="2"
-                      HorizontalGridLinesBrush="#11000000"
-                      VerticalScrollBarVisibility="Auto"
-                      RowHeaderWidth="0"
-                      SelectionMode="Single"
-                      SelectionUnit="FullRow"
-                      SnapsToDevicePixels="True"
-                      EnableRowVirtualization="True"
-                      EnableColumnVirtualization="True"
-                      HorizontalAlignment="Left"
-                      Width="1100"
-                      MinWidth="1100"
-                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                      ScrollViewer.CanContentScroll="False">
-                <DataGrid.ColumnHeaderStyle>
-                    <Style TargetType="DataGridColumnHeader">
-                        <Setter Property="FontWeight"
-                                Value="SemiBold" />
-                        <Setter Property="Padding"
-                                Value="10,6" />
-                        <Setter Property="HorizontalContentAlignment"
-                                Value="Left" />
-                        <Setter Property="BorderBrush"
-                                Value="#15000000" />
-                        <Setter Property="BorderThickness"
-                                Value="0,1,0,1" />
-                    </Style>
-                </DataGrid.ColumnHeaderStyle>
-                <DataGrid.RowStyle>
+            <ui:DataGrid ItemsSource="{Binding ViewModel.Protocols}"
+                         SelectedItem="{Binding ViewModel.SelectedProtocol, Mode=TwoWay}"
+                         AutoGenerateColumns="False"
+                         CanUserAddRows="False"
+                         CanUserDeleteRows="False"
+                         CanUserReorderColumns="False"                 
+                         IsReadOnly="True"
+                         HeadersVisibility="Column"
+                         GridLinesVisibility="Horizontal"
+                         AlternationCount="2"
+                         HorizontalGridLinesBrush="#11000000"
+                         VerticalScrollBarVisibility="Auto"
+                         RowHeaderWidth="0"
+                         SelectionMode="Single"
+                         SelectionUnit="FullRow"
+                         SnapsToDevicePixels="True"
+                         EnableRowVirtualization="True"
+                         EnableColumnVirtualization="True"
+                         HorizontalAlignment="Left"
+                         ColumnHeaderStyle="{StaticResource AppDataGridHeaderStyle}"
+                         Width="1100"
+                         MinWidth="1100"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.CanContentScroll="False">
+                
+                <ui:DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Padding"
                                 Value="4" />
@@ -126,9 +124,9 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-                </DataGrid.RowStyle>
+                </ui:DataGrid.RowStyle>
 
-                <DataGrid.Columns>
+                <ui:DataGrid.Columns>
                     <DataGridTextColumn Binding="{Binding Id}"
                                         Header="ID"
                                         Width="60" />
@@ -149,12 +147,12 @@
                                         Width="250" />
                     <DataGridTextColumn Header="Created"
                                         Width="170"
-                                        Binding="{Binding CreatedAt, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" />
+                                        Binding="{Binding CreatedAt, Converter={StaticResource UtcToKst}}" />
                     <DataGridTextColumn Header="Updated"
                                         Width="170"
-                                        Binding="{Binding UpdatedAt, StringFormat={}{0:yyyy-MM-dd HH:mm:ss}}" />
-                </DataGrid.Columns>
-            </DataGrid>
+                                        Binding="{Binding UpdatedAt, Converter={StaticResource UtcToKst}}" />
+                </ui:DataGrid.Columns>
+            </ui:DataGrid>
         </ScrollViewer>
 
         <uc:LoadingOverlay Grid.Row="0"

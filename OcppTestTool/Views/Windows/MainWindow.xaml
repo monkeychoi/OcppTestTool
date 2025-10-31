@@ -42,11 +42,12 @@
             <ui:TitleBar.TrailingContent>
                 <!-- 우측: 사용자 영역(아바타+이름, 클릭하면 메뉴) -->
                 <StackPanel Orientation="Horizontal"
-                            Grid.Column="1">
+                            Grid.Column="1"
+                            Margin="0,0,10,0">
 
                     <Menu FontSize="14">
                         <ui:MenuItem Header="{Binding ViewModel.CurrentUser.UserName}"
-                                     Icon="{ui:SymbolIcon Symbol=Document24}">
+                                     Icon="{ui:SymbolIcon Symbol=Accessibility32}">
                             <ui:MenuItem Header="정보변경" />
                             <ui:MenuItem Header="비밀번호 변경" />
                             <ui:MenuItem Header="로그아웃"
@@ -54,6 +55,28 @@
 
                         </ui:MenuItem>
                     </Menu>
+
+                    <TextBlock Text="{Binding ViewModel.TokenRemainingText}"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Margin="10,0,0,0"
+                               VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock"
+                                   BasedOn="{StaticResource {x:Type TextBlock}}">
+                                <Setter Property="Foreground"
+                                        Value="Blue" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ViewModel.TokenIsExpiringSoon}"
+                                                 Value="True">
+                                        <Setter Property="Foreground"
+                                                Value="Red" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
                 </StackPanel>
             </ui:TitleBar.TrailingContent>
         </ui:TitleBar>

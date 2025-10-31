@@ -35,7 +35,7 @@ namespace OcppTestTool.Models.Dtos.Protocol
 
     public sealed class OcppProtocolEditDto
     {
-        [JsonPropertyName("id")] public string Id { get; init; } = "";
+        [JsonPropertyName("id")] public int Id { get; init; }
         [JsonPropertyName("name")] public string Name { get; init; } = "";
         [JsonPropertyName("version")] public string Version { get; init; } = "";
         [JsonPropertyName("transport")] public string Transport { get; init; } = "";

@@ -2,11 +2,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using OcppTestTool.Features.Protocol;
+using OcppTestTool.Infrastructure.Validation;
 using OcppTestTool.Models.Entities.Options;
+using OcppTestTool.Models.Entities.Protocol;
 using OcppTestTool.Services;
 using OcppTestTool.Services.Auth;
 using OcppTestTool.Services.Http;
 using OcppTestTool.Services.Protocol;
+using OcppTestTool.Services.UI;
 using OcppTestTool.Services.Windows;
 using OcppTestTool.ViewModels.Pages;
 using OcppTestTool.ViewModels.Windows;
@@ -85,6 +89,7 @@ namespace OcppTestTool
 
                 // Services
                 services.AddSingleton<ISessionService, SessionService>();
+                services.AddSingleton<IUiMessageService, WpfUiMessageService>();
 
                 // 1) ApiOptions 바인딩 (appsettings.json의 "Api" 섹션)
                 services.Configure<ApiOptions>(context.Configuration.GetSection("Api"));

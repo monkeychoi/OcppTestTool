@@ -5,5 +5,7 @@
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibility" />
     <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringToVisibility" />
     <converters:InverseBoolConverter x:Key="InverseBool" />
+    <converters:NotNullToBoolConverter x:Key="NotNullToBool" />
+    <converters:UtcToKstConverter x:Key="UtcToKst" />
 
 </ResourceDictionary>
