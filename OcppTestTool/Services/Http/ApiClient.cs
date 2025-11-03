@@ -25,8 +25,11 @@ namespace OcppTestTool.Services.Http
         {
             try
             {
-                using var resp = await _http.GetAsync(uri, ct);
-                return await ToResult<T>(resp, ct);
+                using var resp = await _http
+                    .GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct)
+                    .ConfigureAwait(false);
+
+                return await ToResult<T>(resp, ct).ConfigureAwait(false);
             }
             catch (TaskCanceledException) { return ApiResult<T>.Fail("요청이 취소되었습니다."); }
             catch (HttpRequestException ex) { return ApiResult<T>.Fail($"네트워크 오류: {ex.Message}"); }
@@ -36,8 +39,11 @@ namespace OcppTestTool.Services.Http
         {
             try
             {
-                using var resp = await _http.PostAsJsonAsync(uri, body, _json, ct);
-                return await ToResult<TResp>(resp, ct);
+                using var resp = await _http
+                    .PostAsJsonAsync(uri, body, _json, ct)
+                    .ConfigureAwait(false);
+
+                return await ToResult<TResp>(resp, ct).ConfigureAwait(false);
             }
             catch (TaskCanceledException) { return ApiResult<TResp>.Fail("요청이 취소되었습니다."); }
             catch (HttpRequestException ex) { return ApiResult<TResp>.Fail($"네트워크 오류: {ex.Message}"); }
@@ -47,8 +53,11 @@ namespace OcppTestTool.Services.Http
         {
             try
             {
-                using var resp = await _http.PutAsJsonAsync(uri, body, _json, ct);
-                return await ToResult<TResp>(resp, ct);
+                using var resp = await _http
+                    .PutAsJsonAsync(uri, body, _json, ct)
+                    .ConfigureAwait(false);
+
+                return await ToResult<TResp>(resp, ct).ConfigureAwait(false);
             }
             catch (TaskCanceledException) { return ApiResult<TResp>.Fail("요청이 취소되었습니다."); }
             catch (HttpRequestException ex) { return ApiResult<TResp>.Fail($"네트워크 오류: {ex.Message}"); }
@@ -58,14 +67,17 @@ namespace OcppTestTool.Services.Http
         {
             try
             {
-                using var resp = await _http.DeleteAsync(uri, ct);
+                using var resp = await _http
+                    .DeleteAsync(uri, ct)
+                    .ConfigureAwait(false);
+
                 var code = (int)resp.StatusCode;
                 var reason = resp.ReasonPhrase;
 
-                if (resp.IsSuccessStatusCode) 
+                if (resp.IsSuccessStatusCode)
                     return ApiResult<bool>.Ok(true, code, reason);
 
-                var err = await ReadErrorAsync(resp, ct);
+                var err = await ReadErrorAsync(resp, ct).ConfigureAwait(false);
                 return ApiResult<bool>.Fail(err, code, reason);
             }
             catch (TaskCanceledException) { return ApiResult<bool>.Fail("요청이 취소되었습니다."); }
@@ -74,81 +86,103 @@ namespace OcppTestTool.Services.Http
 
         private static async Task<ApiResult<T>> ToResult<T>(HttpResponseMessage resp, CancellationToken ct)
         {
+            var code = (int)resp.StatusCode;
+            var reason = resp.ReasonPhrase;
+
             if (resp.IsSuccessStatusCode)
             {
-                // NoContent 대응
                 if (resp.StatusCode == HttpStatusCode.NoContent)
-                    return ApiResult<T>.Ok(default!);
+                    return ApiResult<T>.Ok(default!, code, reason);
 
-                var data = await resp.Content.ReadFromJsonAsync<T>(_json, ct);
-                return data is not null
-                    ? ApiResult<T>.Ok(data)
-                    : ApiResult<T>.Fail("서버 응답 파싱 실패");
+                await using var stream = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+                try
+                {
+                    var data = await JsonSerializer
+                        .DeserializeAsync<T>(stream, _json, ct)
+                        .ConfigureAwait(false);
+
+                    return data is not null
+                        ? ApiResult<T>.Ok(data, code, reason)
+                        : ApiResult<T>.Fail("서버 응답 파싱 실패", code, reason);
+                }
+                catch (JsonException jx)
+                {
+                    // 파싱 실패 시 원문을 읽어 메시지로 돌려줌(디버깅/로그 용이)
+                    var raw = await ReadContentAsStringSafe(resp, ct).ConfigureAwait(false);
+                    return ApiResult<T>.Fail($"JSON 파싱 실패: {jx.Message}\n{raw}", code, reason);
+                }
             }
-            var error = await ReadErrorAsync(resp, ct);
-            return ApiResult<T>.Fail(error);
+
+            var error = await ReadErrorAsync(resp, ct).ConfigureAwait(false);
+            return ApiResult<T>.Fail(error, code, reason);
         }
 
         private static async Task<string> ReadErrorAsync(HttpResponseMessage resp, CancellationToken ct)
         {
-            // RFC 7807 ProblemDetails 대응 시도
+            var status = (int)resp.StatusCode;
             try
             {
-                var content = await resp.Content.ReadAsStringAsync(ct);
-                var status = (int)resp.StatusCode;
-
+                var content = await ReadContentAsStringSafe(resp, ct).ConfigureAwait(false);
                 if (string.IsNullOrWhiteSpace(content))
                     return $"{status} {resp.ReasonPhrase}";
-
-                string? msg = null;
 
                 try
                 {
                     using var doc = JsonDocument.Parse(content);
                     var root = doc.RootElement;
 
-                    // 1) 문제 상세 우선
+                    // RFC 7807 우선
                     if (root.TryGetProperty("detail", out var d) && d.ValueKind == JsonValueKind.String)
-                        msg = d.GetString();
+                        return d.GetString() ?? $"HTTP {status}";
 
-                    // 2) 타이틀
-                    if (msg is null && root.TryGetProperty("title", out var t) && t.ValueKind == JsonValueKind.String)
-                        msg = t.GetString();
+                    if (root.TryGetProperty("title", out var t) && t.ValueKind == JsonValueKind.String)
+                        return t.GetString() ?? $"HTTP {status}";
 
-                    // 3) 일반적인 에러 키들
-                    if (msg is null && root.TryGetProperty("error", out var e) && e.ValueKind == JsonValueKind.String)
-                        msg = e.GetString();
+                    // 일반적 키
+                    if (root.TryGetProperty("error", out var e) && e.ValueKind == JsonValueKind.String)
+                        return e.GetString() ?? $"HTTP {status}";
 
-                    if (msg is null && root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String)
-                        msg = m.GetString();
+                    if (root.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.String)
+                        return m.GetString() ?? $"HTTP {status}";
 
-                    // 4) ModelState 스타일의 errors 객체가 있을 수 있음
-                    if (msg is null && root.TryGetProperty("errors", out var errs) && errs.ValueKind == JsonValueKind.Object)
+                    // ModelState 스타일
+                    if (root.TryGetProperty("errors", out var errs) && errs.ValueKind == JsonValueKind.Object)
                     {
                         foreach (var prop in errs.EnumerateObject())
                         {
-                            // ["메시지1","메시지2"...] 중 첫 개만 사용
                             if (prop.Value.ValueKind == JsonValueKind.Array && prop.Value.GetArrayLength() > 0)
                             {
                                 var first = prop.Value[0];
                                 if (first.ValueKind == JsonValueKind.String)
-                                {
-                                    msg = first.GetString();
-                                    break;
-                                }
+                                    return first.GetString() ?? $"HTTP {status}";
                             }
                         }
                     }
-                }
-                catch { /* 무시하고 원문 반환 */ }
 
-                // 최종 메시지 구성: 내용 + (HTTP 코드)
-                msg ??= content;
-                return $"{msg} (HTTP {status})";
+                    // 그 외에는 원문
+                    return $"{content}";
+                }
+                catch
+                {
+                    return $"{content}";
+                }
             }
             catch
             {
-                return $"{(int)resp.StatusCode} {resp.ReasonPhrase}";
+                return $"{status} {resp.ReasonPhrase}";
+            }
+        }
+
+        // 문자열 읽기 헬퍼(예외 억제)
+        private static async Task<string> ReadContentAsStringSafe(HttpResponseMessage resp, CancellationToken ct)
+        {
+            try
+            {
+                return await resp.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
     }

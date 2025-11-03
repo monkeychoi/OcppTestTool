@@ -20,8 +20,9 @@ namespace OcppTestTool.Models.Entities.Common
         public static readonly MenuDef[] All =
         {
             new("대시보드",   SymbolRegular.Home24,   typeof(Views.Pages.DashboardPage)),
-            new("프로토콜관리", SymbolRegular.Settings24, typeof(Views.Pages.ProtocolManagementPage), "Admin"),
-            new("사용자관리", SymbolRegular.People32, typeof(Views.Pages.UserManagementPage), "Admin"),
+            new("프로토콜 관리", SymbolRegular.Settings24, typeof(Views.Pages.ProtocolManagementPage), "Admin"),
+            new("프로토콜 템플릿 관리", SymbolRegular.Settings24, typeof(Views.Pages.ProtocolTemplateManagementPage), "Admin"),
+            new("사용자 관리", SymbolRegular.People32, typeof(Views.Pages.UserManagementPage), "Admin"),
         };
     }
 }

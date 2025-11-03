@@ -10,6 +10,7 @@ using OcppTestTool.Services.Windows;
 using OcppTestTool.ViewModels.ChildWindows;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Wpf.Ui;
 using Wpf.Ui.Abstractions.Controls;
 

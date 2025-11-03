@@ -76,6 +76,7 @@ namespace OcppTestTool
                 // Pages
                 services.AddTransient<DashboardPage>();
                 services.AddTransient<ProtocolManagementPage>();
+                services.AddTransient<ProtocolTemplateManagementPage>();
                 services.AddTransient<UserManagementPage>();
                 services.AddTransient<DataPage>();
                 services.AddTransient<SettingsPage>();
@@ -83,6 +84,7 @@ namespace OcppTestTool
                 // ViewModels
                 services.AddTransient<DashboardViewModel>();
                 services.AddTransient<ProtocolManagementViewModel>();
+                services.AddTransient<ProtocolTemplateManagementViewModel>();
                 services.AddTransient<UserManagementViewModel>();
                 services.AddTransient<DataViewModel>();
                 services.AddTransient<SettingsViewModel>();
@@ -114,6 +116,7 @@ namespace OcppTestTool
                 // 4) 도메인 API 등록
                 services.AddTransient<IAuthService, AuthService>();
                 services.AddTransient<IProtocolManagementService, ProtocolManagementService>();
+                services.AddTransient<IProtocolTemplateManagementService, ProtocolTemplateManagementService>();
 
 
             }).Build();
