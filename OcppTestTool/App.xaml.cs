@@ -116,7 +116,6 @@ namespace OcppTestTool
                 // 4) 도메인 API 등록
                 services.AddTransient<IAuthService, AuthService>();
                 services.AddTransient<IProtocolManagementService, ProtocolManagementService>();
-                services.AddTransient<IProtocolTemplateManagementService, ProtocolTemplateManagementService>();
 
 
             }).Build();

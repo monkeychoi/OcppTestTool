@@ -55,45 +55,41 @@
             </StackPanel>
             
         </Grid>
+
+        <ui:DataGrid Grid.Row="1"
+                     Margin="0,8,0,0"
+                     ItemsSource="{Binding ViewModel.Protocols}"
+                     SelectedItem="{Binding ViewModel.SelectedProtocol, Mode=TwoWay}"
+                     Style="{StaticResource AppDataGridStyle}">
+
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Id}"
+                                    Header="ID"
+                                    Width="60" />
+                <DataGridTextColumn Binding="{Binding Name}"
+                                    Header="Name"
+                                    Width="120" />
+                <DataGridTextColumn Binding="{Binding Version}"
+                                    Header="Version"
+                                    Width="100" />
+                <DataGridTextColumn Binding="{Binding Transport}"
+                                    Header="Transport"
+                                    Width="120" />
+                <DataGridTextColumn Binding="{Binding Codec}"
+                                    Header="Codec"
+                                    Width="100" />
+                <DataGridTextColumn Binding="{Binding Meta.Description}"
+                                    Header="Description"
+                                    Width="SizeToCells" />
+                <DataGridTextColumn Header="Created"
+                                    Width="170"
+                                    Binding="{Binding CreatedAt, Converter={StaticResource UtcToKst}}" />
+                <DataGridTextColumn Header="Updated"
+                                    Width="170"
+                                    Binding="{Binding UpdatedAt, Converter={StaticResource UtcToKst}}" />
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
         
-        <ScrollViewer Grid.Row="1"
-                      Margin="0,8,0,0"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Disabled"
-                      CanContentScroll="False">
-
-            <ui:DataGrid ItemsSource="{Binding ViewModel.Protocols}"
-                         SelectedItem="{Binding ViewModel.SelectedProtocol, Mode=TwoWay}"
-                         Style="{StaticResource AppDataGridStyle}">
-
-                <ui:DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Id}"
-                                        Header="ID"
-                                        Width="60" />
-                    <DataGridTextColumn Binding="{Binding Name}"
-                                        Header="Name"
-                                        Width="120" />
-                    <DataGridTextColumn Binding="{Binding Version}"
-                                        Header="Version"
-                                        Width="100" />
-                    <DataGridTextColumn Binding="{Binding Transport}"
-                                        Header="Transport"
-                                        Width="120" />
-                    <DataGridTextColumn Binding="{Binding Codec}"
-                                        Header="Codec"
-                                        Width="120" />
-                    <DataGridTextColumn Binding="{Binding Meta.Description}"
-                                        Header="Description"
-                                        Width="250" />
-                    <DataGridTextColumn Header="Created"
-                                        Width="170"
-                                        Binding="{Binding CreatedAt, Converter={StaticResource UtcToKst}}" />
-                    <DataGridTextColumn Header="Updated"
-                                        Width="170"
-                                        Binding="{Binding UpdatedAt, Converter={StaticResource UtcToKst}}" />
-                </ui:DataGrid.Columns>
-            </ui:DataGrid>
-        </ScrollViewer>
 
         <uc:LoadingOverlay Grid.Row="0"
                            Grid.RowSpan="3"

@@ -59,8 +59,22 @@ namespace OcppTestTool.ViewModels.Pages
 
             try
             {
-                var list = await _service.GetProtocolsAsync();                
-                Protocols = new ObservableCollection<OcppProtocol>(list);
+                var list = await _service.GetProtocolsAsync();
+                //Protocols = new ObservableCollection<OcppProtocol>(list);
+
+                Protocols.Clear();
+
+                const int batch = 1; // 상황에 맞게 조절
+                for (int i = 0; i < list.Count; i += batch)
+                {
+                    var slice = list.Skip(i).Take(batch);
+                    foreach (var item in slice)
+                        Protocols.Add(item);
+
+                    // UI에 양보해서 오버레이·스크롤·히트테스트가 살아있게
+                    await Task.Yield();
+                }
+
             }
             catch (Exception ex)
             {

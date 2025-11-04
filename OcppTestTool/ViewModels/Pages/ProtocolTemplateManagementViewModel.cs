@@ -20,16 +20,19 @@ namespace OcppTestTool.ViewModels.Pages
     {
         private bool _isInitialized = false;
 
-        private readonly IProtocolTemplateManagementService _service;
+        private readonly IProtocolManagementService _service;
         private readonly IWindowService _windows;
         private readonly IUiMessageService _ui;
+
+        [ObservableProperty] private ObservableCollection<OcppProtocol> protocols = new();
+        [ObservableProperty] private OcppProtocol? selectedProtocol = null;
 
         [ObservableProperty] private ObservableCollection<OcppProtocolTemplate> protocolTemplates = new();
         [ObservableProperty] private OcppProtocolTemplate? selectedProtocolTemplate;
         [ObservableProperty] private bool isBusy;
         [ObservableProperty] private string errorMessage = "";
 
-        public ProtocolTemplateManagementViewModel(IWindowService windows, IProtocolTemplateManagementService service, IUiMessageService ui)
+        public ProtocolTemplateManagementViewModel(IWindowService windows, IProtocolManagementService service, IUiMessageService ui)
         {
             _windows = windows;
             _service = service;
@@ -48,11 +51,51 @@ namespace OcppTestTool.ViewModels.Pages
         private async Task InitializeViewModel()
         {
             _isInitialized = true;
-            await LoadAsync();
+            await LoadProtocolsAsync();
         }
 
+        partial void OnSelectedProtocolChanged(OcppProtocol? value)
+        {
+            MessageBox.Show($"선택된 프로토콜: {value?.Name ?? "없음"}", "디버그", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        /// <summary>
+        /// 프로토콜 목록 로드
+        /// </summary>
+        /// <returns></returns>
         [RelayCommand]
-        private async Task LoadAsync()
+        private async Task LoadProtocolsAsync()
+        {
+            ErrorMessage = "";
+            IsBusy = true;
+
+            try
+            {
+                var list = await _service.GetProtocolsAsync();
+
+                Protocols.Clear();
+
+                foreach (var item in list)
+                    Protocols.Add(item);
+
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = ex.Message;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+
+        /// <summary>
+        /// 프로토콜 템플릿 목록 로드
+        /// </summary>
+        /// <returns></returns>
+        [RelayCommand]
+        private async Task LoadProtocolTemplatesAsync()
         {
             ErrorMessage = "";
             IsBusy = true;
@@ -62,7 +105,21 @@ namespace OcppTestTool.ViewModels.Pages
             try
             {
                 var list = await _service.GetProtocolTemplatesAsync(1);
-                ProtocolTemplates = new ObservableCollection<OcppProtocolTemplate>(list);
+                //ProtocolTemplates = new ObservableCollection<OcppProtocolTemplate>(list);
+
+                ProtocolTemplates.Clear();
+
+                const int batch = 1; // 상황에 맞게 조절
+                for (int i = 0; i < list.Count; i += batch)
+                {
+                    var slice = list.Skip(i).Take(batch);
+                    foreach (var item in slice)
+                        ProtocolTemplates.Add(item);
+
+                    // UI에 양보해서 오버레이·스크롤·히트테스트가 살아있게
+                    await Task.Yield();
+                }
+
             }
             catch (Exception ex)
             {
@@ -70,12 +127,12 @@ namespace OcppTestTool.ViewModels.Pages
             }
             finally
             {
-                //IsBusy = false;
+                IsBusy = false;
             }
         }
 
         [RelayCommand]
-        private Task RefreshAsync() => LoadAsync();
+        private Task RefreshAsync() => LoadProtocolTemplatesAsync();
 
         /// <summary>
         /// 신규 등록

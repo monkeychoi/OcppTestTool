@@ -11,9 +11,16 @@ namespace OcppTestTool.Services.Protocol
 {
     public interface IProtocolManagementService
     {
+        // --------- 프로토콜 관리  ----------
         Task<IReadOnlyList<OcppProtocol>> GetProtocolsAsync(CancellationToken ct = default);
         Task<ApiResult<OcppProtocol>> CreateProtocolAsync(OcppProtocolCreateDto dto, CancellationToken ct = default);
         Task<ApiResult<OcppProtocol>> EditProtocolAsync(OcppProtocolEditDto dto, CancellationToken ct = default);
         Task<ApiResult<bool>> DeleteProtocolAsync(int id, CancellationToken ct = default);
+
+        // --------- 프로토콜 템플릿 관리  ----------
+        Task<IReadOnlyList<OcppProtocolTemplate>> GetProtocolTemplatesAsync(int protocolId, CancellationToken ct = default);
+        //Task<ApiResult<OcppProtocol>> CreateProtocolAsync(OcppProtocolCreateDto dto, CancellationToken ct = default);
+        //Task<ApiResult<OcppProtocol>> EditProtocolAsync(OcppProtocolEditDto dto, CancellationToken ct = default);
+        //Task<ApiResult<bool>> DeleteProtocolAsync(int id, CancellationToken ct = default);
     }
 }

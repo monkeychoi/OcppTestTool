@@ -63,6 +63,23 @@
                                     <RotateTransform Angle="0" />
                                 </Path.RenderTransform>
                             </Path>
+
+                            <!-- 리사이즈 그리퍼: 왼쪽 -->
+                            <Thumb x:Name="PART_LeftHeaderGripper"
+                                   HorizontalAlignment="Left"
+                                   Width="8"
+                                   Background="Transparent"
+                                   Cursor="SizeWE"
+                                   Opacity="0" />
+
+                            <!-- 리사이즈 그리퍼: 오른쪽 -->
+                            <Thumb x:Name="PART_RightHeaderGripper"
+                                   HorizontalAlignment="Right"
+                                   Width="8"
+                                   Background="Transparent"
+                                   Cursor="SizeWE"
+                                   Opacity="0" />
+
                         </Grid>
                     </Border>
 
@@ -152,12 +169,22 @@
         <!-- 네가 매번 쓰던 공통 옵션들 -->
         <Setter Property="AutoGenerateColumns"
                 Value="False" />
+        <Setter Property="EnableRowVirtualization"
+                Value="True" />
+        <Setter Property="EnableColumnVirtualization"
+                Value="True" />
+        <Setter Property="VirtualizingPanel.IsVirtualizing"
+                Value="True" />
+        <Setter Property="VirtualizingPanel.VirtualizationMode"
+                Value="Recycling" />
         <Setter Property="CanUserAddRows"
                 Value="False" />
         <Setter Property="CanUserDeleteRows"
                 Value="False" />
         <Setter Property="CanUserReorderColumns"
                 Value="False" />
+        <Setter Property="CanUserResizeColumns"
+                Value="True" />
         <Setter Property="IsReadOnly"
                 Value="True" />
         <Setter Property="HeadersVisibility"
@@ -183,17 +210,18 @@
         <Setter Property="EnableColumnVirtualization"
                 Value="True" />
         <Setter Property="HorizontalAlignment"
-                Value="Left" />
-        <Setter Property="MinWidth"
-                Value="1100" />
-        <Setter Property="Width"
-                Value="1100" />
+                Value="Stretch" />
+        <Setter Property="VerticalAlignment"
+                Value="Stretch" />
+
 
         <!-- ScrollViewer의 첨부속성도 Setter로 가능 -->
         <Setter Property="ScrollViewer.HorizontalScrollBarVisibility"
-                Value="Disabled" />
+                Value="Auto" />
+        <Setter Property="ScrollViewer.VerticalScrollBarVisibility"
+                Value="Auto" />
         <Setter Property="ScrollViewer.CanContentScroll"
-                Value="False" />
+                Value="True" />
 
         <!-- 우리 커스텀 헤더/행 스타일 적용 -->
         <Setter Property="ColumnHeaderStyle"

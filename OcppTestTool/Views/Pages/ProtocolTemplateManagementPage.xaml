@@ -21,6 +21,7 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -55,48 +56,71 @@
             </StackPanel>
             
         </Grid>
-        
-        <ScrollViewer Grid.Row="1"
-                      Margin="0,8,0,0"
-                      HorizontalScrollBarVisibility="Auto"
-                      VerticalScrollBarVisibility="Disabled"
-                      CanContentScroll="False">
 
-            <ui:DataGrid ItemsSource="{Binding ViewModel.ProtocolTemplates}"
-                         SelectedItem="{Binding ViewModel.SelectedProtocolTemplate, Mode=TwoWay}"
-                         Style="{StaticResource AppDataGridStyle}">
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="1"
+                    Margin="0,12,0,0">
+            <TextBlock Text="프로토콜 선택: "
+                       VerticalAlignment="Center" />
+            <ComboBox Width="200"
+                      IsEditable="True"
+                      IsReadOnly="True"
+                      ItemsSource="{Binding ViewModel.Protocols}"
+                      SelectedItem="{Binding ViewModel.SelectedProtocol, Mode=TwoWay}"
+                      DisplayMemberPath="Name"
+                      Text="{Binding ViewModel.SelectedProtocol.Name,
+                         TargetNullValue='프로토콜 선택',
+                         FallbackValue='프로토콜 선택'}"/>
 
-                <ui:DataGrid.Columns>
-                    <DataGridTextColumn Binding="{Binding Id}"
-                                        Header="ID"
-                                        Width="60" />
-                    <DataGridTextColumn Binding="{Binding SchemaName}"
-                                        Header="SchemaName"
-                                        Width="120" />
-                    <DataGridTextColumn Binding="{Binding TemplateName}"
-                                        Header="TemplateName"
-                                        Width="100" />
-                    <DataGridTextColumn Binding="{Binding Direction}"
-                                        Header="Direction"
-                                        Width="120" />
-                    <DataGridTextColumn Binding="{Binding MessageType}"
-                                        Header="MessageType"
-                                        Width="120" />
-                    <DataGridTextColumn Binding="{Binding Version}"
-                                        Header="Version"
-                                        Width="120" />
-                    <DataGridTextColumn Header="Created"
-                                        Width="170"
-                                        Binding="{Binding CreatedAt, Converter={StaticResource UtcToKst}}" />
-                    <DataGridTextColumn Header="Updated"
-                                        Width="170"
-                                        Binding="{Binding UpdatedAt, Converter={StaticResource UtcToKst}}" />
-                </ui:DataGrid.Columns>
-            </ui:DataGrid>
-        </ScrollViewer>
+        </StackPanel>
+
+        <ui:DataGrid Grid.Row="2"
+                     Margin="0,8,0,0"
+                     ItemsSource="{Binding ViewModel.ProtocolTemplates}"
+                     SelectedItem="{Binding ViewModel.SelectedProtocolTemplate, Mode=TwoWay}"
+                     Style="{StaticResource AppDataGridStyle}">
+
+            <ui:DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding Id}"
+                                    Header="ID"
+                                    Width="60" />
+                <DataGridTextColumn Binding="{Binding SchemaName}"
+                                    Header="SchemaName"
+                                    Width="230" />
+                <DataGridTextColumn Binding="{Binding TemplateName}"
+                                    Header="TemplateName"
+                                    Width="SizeToCells"
+                                    MinWidth="250">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextTrimming"
+                                    Value="CharacterEllipsis" />
+                            <Setter Property="ToolTip"
+                                    Value="{Binding TemplateName}" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding Direction}"
+                                    Header="Direction"
+                                    Width="120" />
+                <DataGridTextColumn Binding="{Binding MessageType}"
+                                    Header="MessageType"
+                                    Width="200" />
+                <DataGridTextColumn Binding="{Binding Version}"
+                                    Header="Version"
+                                    Width="80" />
+                <DataGridTextColumn Header="Created"
+                                    Width="170"
+                                    Binding="{Binding CreatedAt, Converter={StaticResource UtcToKst}}" />
+                <DataGridTextColumn Header="Updated"
+                                    Width="170"
+                                    Binding="{Binding UpdatedAt, Converter={StaticResource UtcToKst}}" />
+            </ui:DataGrid.Columns>
+        </ui:DataGrid>
+       
 
         <uc:LoadingOverlay Grid.Row="0"
-                           Grid.RowSpan="3"
+                           Grid.RowSpan="2"
                            Margin="-20"
                            IsOpen="{Binding ViewModel.IsBusy}"
                            Message="데이터를 불러오는 중..."
